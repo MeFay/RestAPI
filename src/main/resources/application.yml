@@ -2,8 +2,12 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: 12345
+    password: postgres
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html

@@ -169,7 +169,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void updateUser_nullId() throws Exception {
+    public void updateUser_nullIdFailure() throws Exception {
         UserEntity updatedUser1 = new UserEntity(1, "agua", "aqua");
 
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
@@ -187,7 +187,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void updateUserRecord_UserNotFound() throws Exception {
+    public void updateUserRecord_UserNotFoundFailure() throws Exception {
         UserEntity updatedUser = new UserEntity(1, "pedro", "milho");
 
         Mockito.when(userRepository.findById(updatedUser.getId())).thenReturn(Optional.empty());
@@ -199,6 +199,32 @@ public class UserControllerTest {
                 .content(this.mapper.writeValueAsString(updatedUser));
 
         mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    public void deletePatientById_success() throws Exception {
+        UserEntity updatedUser = new UserEntity(1, "qwe", "rty");
+
+        Mockito.when(userRepository.findById(updatedUser.getId())).thenReturn(Optional.of(updatedUser));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/user/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    public void deletePatientById_notFound() throws Exception {
+        UserEntity updatedUser = new UserEntity(1, "min", "der");
+
+        Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/user/1")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 }

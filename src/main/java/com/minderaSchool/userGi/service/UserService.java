@@ -1,5 +1,8 @@
 package com.minderaSchool.userGi.service;
 
+import com.minderaSchool.userGi.dto.UserDtoAllInfo;
+import com.minderaSchool.userGi.dto.UserDtoUsernamePassword;
+import com.minderaSchool.userGi.dto.UserDtoGetUsers;
 import com.minderaSchool.userGi.entity.UserEntity;
 import com.minderaSchool.userGi.exception.EmptyException;
 import com.minderaSchool.userGi.exception.ErrorException;
@@ -8,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -16,68 +18,70 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserEntity createUser(UserEntity user) {
+    public UserDtoUsernamePassword createUser(UserDtoUsernamePassword userDto) {
         try {
-            if (user.getUsername() == null || user.getPassword() == null) {
+            if (userDto.getUsername() == null || userDto.getPassword() == null) {
                 throw new EmptyException();
             }
         } catch (Exception e) {
             throw new EmptyException();
         }
-        return userRepository.save(user);
+        UserEntity userEntity = new UserEntity();
+
+        userEntity.setUsername(userDto.getUsername());
+        userEntity.setPassword(userDto.getPassword());
+        userRepository.save(userEntity);
+        return userDto;
     }
 
-    public Optional<UserEntity> getUser(Integer id) throws EmptyException {
-        return Optional.ofNullable(userRepository.findById(id).orElseThrow(() -> new ErrorException()));
+    public UserDtoAllInfo getUser(Integer id) throws EmptyException {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new EmptyException());
+
+        return new UserDtoAllInfo(userEntity.getId(), userEntity.getUsername(), userEntity.getPassword());
     }
 
-    public List<UserEntity> getAllUsers() {
-        try {
-            return userRepository.findAll();
-        } catch (Exception e) {
-            throw new ErrorException();
-        }
+    public List<UserDtoGetUsers> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(userEntity -> new UserDtoGetUsers(userEntity.getId(), userEntity.getUsername()))
+                .toList();
     }
 
-    public UserEntity update(Integer id, UserEntity newUser) {
+    public UserDtoUsernamePassword update(Integer id, UserDtoUsernamePassword newUser) {
+
+        UserEntity oldUser = userRepository.findById(id).orElseThrow(() -> new EmptyException());
 
         if (newUser.getUsername() == null || newUser.getPassword() == null) {
             throw new EmptyException();
         }
 
-        UserEntity oldUser = userRepository.findById(id).orElseThrow(() -> new ErrorException());
-
-        oldUser.setUsername(newUser.getUsername());
-        oldUser.setPassword(newUser.getPassword());
+        oldUser = new UserEntity(oldUser.getId(), newUser.getUsername(), newUser.getPassword());
         userRepository.save(oldUser);
-        return oldUser;
+        return newUser;
     }
 
-    public UserEntity patch(Integer id, UserEntity newUser) {
-        try {
-            if (newUser.getUsername() == null && newUser.getPassword() == null) {
-                throw new EmptyException();
-            }
+    public UserDtoUsernamePassword patch(Integer id, UserDtoUsernamePassword newUser) {
 
-            UserEntity oldUser = userRepository.getReferenceById(id);
-            if (newUser.getUsername() != null) {
-                oldUser.setUsername(newUser.getUsername());
-            }
-            if (newUser.getPassword() != null) {
-                oldUser.setPassword(newUser.getPassword());
-            }
-            userRepository.save(oldUser);
-            return oldUser;
-        } catch (Exception e) {
-            throw new ErrorException();
+        UserEntity oldUser = userRepository.findById(id).orElseThrow(() -> new EmptyException());
+
+        if (newUser.getUsername() == null && newUser.getPassword() == null) {
+            throw new EmptyException();
         }
+        if (newUser.getUsername() != null) {
+            oldUser.setUsername(newUser.getUsername());
+        }
+
+        if (newUser.getPassword() != null) {
+            oldUser.setPassword(newUser.getPassword());
+        }
+
+        oldUser = new UserEntity(oldUser.getId(), newUser.getUsername(), newUser.getPassword());
+        userRepository.save(oldUser);
+        return newUser;
     }
 
     public void deleteUser(Integer id) {
-        try {
-            userRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new ErrorException();
-        }
+        userRepository.findById(id).orElseThrow(() -> new EmptyException());
+        userRepository.deleteById(id);
     }
 }
