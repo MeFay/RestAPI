@@ -50,8 +50,8 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers_success() throws Exception {
-        UserEntity user1 = new UserEntity("david", "elefante");
-        UserEntity user2 = new UserEntity("leo", "rins");
+        UserEntity user1 = new UserEntity(1,"david", "elefante");
+        UserEntity user2 = new UserEntity(2,"leo", "rins");
 
         List<UserEntity> getAllUsers = new ArrayList<>(Arrays.asList(user1, user2));
         Mockito.when(userRepository.findAll()).thenReturn(getAllUsers);
