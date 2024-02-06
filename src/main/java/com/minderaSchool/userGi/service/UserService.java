@@ -50,12 +50,11 @@ public class UserService {
     public UserDtoUsernamePassword update(Integer id, UserDtoUsernamePassword newUser) {
 
         UserEntity oldUser = userRepository.findById(id).orElseThrow(() -> new EmptyException());
-
         if (newUser.getUsername() == null || newUser.getPassword() == null) {
             throw new EmptyException();
         }
 
-        oldUser = new UserEntity(oldUser.getId(), newUser.getUsername(), newUser.getPassword());
+        oldUser = new UserEntity(oldUser.getId(), newUser.getUsername(), newUser.getPassword(), oldUser.getEmail());
         userRepository.save(oldUser);
         return newUser;
     }
@@ -75,7 +74,7 @@ public class UserService {
             oldUser.setPassword(newUser.getPassword());
         }
 
-        oldUser = new UserEntity(oldUser.getId(), newUser.getUsername(), newUser.getPassword());
+        oldUser = new UserEntity(oldUser.getId(), newUser.getUsername(), newUser.getPassword(),oldUser.getEmail());
         userRepository.save(oldUser);
         return newUser;
     }

@@ -50,8 +50,8 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers_success() throws Exception {
-        UserEntity user1 = new UserEntity(1,"david", "elefante");
-        UserEntity user2 = new UserEntity(2,"leo", "rins");
+        UserEntity user1 = new UserEntity(1, "kjh", "david", "kahjsd@gmail.com");
+        UserEntity user2 = new UserEntity(2, "jhg", "leo", "rins@gmail.com");
 
         List<UserEntity> getAllUsers = new ArrayList<>(Arrays.asList(user1, user2));
         Mockito.when(userRepository.findAll()).thenReturn(getAllUsers);
@@ -60,14 +60,14 @@ public class UserControllerTest {
                         .get("/user")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[1].username", is("leo")))
+                .andExpect(jsonPath("$[1].username", is("jhg")))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testGetAllUsers_failure() throws Exception {
-        UserEntity user1 = new UserEntity("david", "elefante");
-        UserEntity user2 = new UserEntity("leo", "rins");
+        UserEntity user1 = new UserEntity("david", "elefante", "kahjsd@gmail.com");
+        UserEntity user2 = new UserEntity("leo", "rins", "rins@gmail.com");
 
         List<UserEntity> getAllUsers = new ArrayList<>(Arrays.asList(user1, user2));
         Mockito.when(userRepository.findAll()).thenReturn(getAllUsers);
@@ -85,21 +85,21 @@ public class UserControllerTest {
 
     @Test
     public void getUserById_success() throws Exception {
-        UserEntity user1 = new UserEntity(1, "mimi", "riri");
+        UserEntity user1 = new UserEntity(1, "titi", "mimi", "riri");
         Mockito.when(userRepository.findById(user1.getId())).thenReturn(java.util.Optional.of(user1));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/user/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.username", is("mimi")))
+                .andExpect(jsonPath("$.username", is("titi")))
                 .andExpect(status().isOk());
     }
 
 
     @Test
     public void getUserById_failure() throws Exception {
-        UserEntity updatedUser1 = new UserEntity(1, "agua", "aqua");
+        UserEntity updatedUser1 = new UserEntity("hjvjb", "agua", "aqua");
 
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
         Mockito.when(userRepository.save(updatedUser1)).thenReturn(updatedUser1);
@@ -117,7 +117,7 @@ public class UserControllerTest {
 
     @Test
     public void createUser_success() throws Exception {
-        UserEntity user1 = new UserEntity("chipi", "chapa");
+        UserEntity user1 = new UserEntity("chipi", "chapa", "chipichapa@gmail.com");
 
         Mockito.when(userRepository.save(user1)).thenReturn(user1);
 
@@ -134,7 +134,7 @@ public class UserControllerTest {
 
     @Test
     public void createUser_failure() throws Exception {
-        UserEntity user1 = new UserEntity("chipi", null);
+        UserEntity user1 = new UserEntity("chipi", "zdg", null);
 
         Mockito.when(userRepository.save(user1)).thenReturn(user1);
 
@@ -151,26 +151,29 @@ public class UserControllerTest {
 
     @Test
     public void updateUserRecord_success() throws Exception {
-        UserEntity updatedUser1 = new UserEntity(1, "dubi", "daba");
+
+        UserEntity updatedUser1 = new UserEntity(1, "hjg", "dubi", "daba");
+        UserEntity updatedUser2 = new UserEntity(1, "hjg", "dfdfdfdf", "dadddba");
+
         Mockito.when(userRepository.findById(updatedUser1.getId())).thenReturn(Optional.of(updatedUser1));
-        Mockito.when(userRepository.save(updatedUser1)).thenReturn(updatedUser1);
+        Mockito.when(userRepository.save(updatedUser1)).thenReturn(updatedUser2);
 
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
-                .post("/user")
+                .put("/user/{id}",1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(this.mapper.writeValueAsString(updatedUser1));
+                .content(this.mapper.writeValueAsString(updatedUser2));
 
         mockMvc.perform(mockRequest)
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.username", is("dubi")))
+                .andExpect(jsonPath("$.username", is("hjg")))
                 .andExpect(status().isOk());
     }
 
 
     @Test
     public void updateUser_nullIdFailure() throws Exception {
-        UserEntity updatedUser1 = new UserEntity(1, "agua", "aqua");
+        UserEntity updatedUser1 = new UserEntity("hh", "agua", "aqua");
 
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
         Mockito.when(userRepository.save(updatedUser1)).thenReturn(updatedUser1);
@@ -188,7 +191,7 @@ public class UserControllerTest {
 
     @Test
     public void updateUserRecord_UserNotFoundFailure() throws Exception {
-        UserEntity updatedUser = new UserEntity(1, "pedro", "milho");
+        UserEntity updatedUser = new UserEntity(1, "jhg", "pedro", "milho");
 
         Mockito.when(userRepository.findById(updatedUser.getId())).thenReturn(Optional.empty());
 
@@ -205,7 +208,7 @@ public class UserControllerTest {
 
     @Test
     public void deletePatientById_success() throws Exception {
-        UserEntity updatedUser = new UserEntity(1, "qwe", "rty");
+        UserEntity updatedUser = new UserEntity(1, "ahahah", "qwe", "rty");
 
         Mockito.when(userRepository.findById(updatedUser.getId())).thenReturn(Optional.of(updatedUser));
 
@@ -218,7 +221,7 @@ public class UserControllerTest {
 
     @Test
     public void deletePatientById_notFound() throws Exception {
-        UserEntity updatedUser = new UserEntity(1, "min", "der");
+        UserEntity updatedUser = new UserEntity("he", "min", "der");
 
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
 
