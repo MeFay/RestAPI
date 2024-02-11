@@ -1,12 +1,10 @@
 package com.minderaSchool.userGi.userControllerTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minderaSchool.userGi.controller.UserController;
 import com.minderaSchool.userGi.entity.UserEntity;
 import com.minderaSchool.userGi.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +38,6 @@ public class UserControllerTest {
     @MockBean
     UserRepository userRepository;
 
-    @InjectMocks
-    UserController userController;
 
     @BeforeEach
     public void setup() {
@@ -70,7 +66,8 @@ public class UserControllerTest {
         UserEntity user2 = new UserEntity("leo", "rins", "rins@gmail.com");
 
         List<UserEntity> getAllUsers = new ArrayList<>(Arrays.asList(user1, user2));
-        Mockito.when(userRepository.findAll()).thenReturn(getAllUsers);
+
+        Mockito.when(userRepository.findAll()).thenReturn(null);
 
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
                 .put("/user/1")
@@ -81,7 +78,6 @@ public class UserControllerTest {
         mockMvc.perform(mockRequest)
                 .andExpect(status().isBadRequest());
     }
-
 
     @Test
     public void getUserById_success() throws Exception {
@@ -99,16 +95,16 @@ public class UserControllerTest {
 
     @Test
     public void getUserById_failure() throws Exception {
-        UserEntity updatedUser1 = new UserEntity("hjvjb", "agua", "aqua");
+        UserEntity user1 = new UserEntity("hjvjb", "agua", "aqua");
 
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
-        Mockito.when(userRepository.save(updatedUser1)).thenReturn(updatedUser1);
+        Mockito.when(userRepository.save(user1)).thenReturn(user1);
 
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
                 .put("/user/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content(this.mapper.writeValueAsString(updatedUser1));
+                .content(this.mapper.writeValueAsString(user1));
 
         mockMvc.perform(mockRequest)
                 .andExpect(status().isBadRequest());
@@ -139,7 +135,7 @@ public class UserControllerTest {
         Mockito.when(userRepository.save(user1)).thenReturn(user1);
 
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
-                .put("/user/1")
+                .post("/user")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(user1));
@@ -150,8 +146,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void updateUserRecord_success() throws Exception {
-
+    public void updateUser_success() throws Exception {
         UserEntity updatedUser1 = new UserEntity(1, "hjg", "dubi", "daba");
         UserEntity updatedUser2 = new UserEntity(1, "hjg", "dfdfdfdf", "dadddba");
 
@@ -190,7 +185,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void updateUserRecord_UserNotFoundFailure() throws Exception {
+    public void updateUser_UserNotFoundFailure() throws Exception {
         UserEntity updatedUser = new UserEntity(1, "jhg", "pedro", "milho");
 
         Mockito.when(userRepository.findById(updatedUser.getId())).thenReturn(Optional.empty());
@@ -207,7 +202,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void deletePatientById_success() throws Exception {
+    public void deleteUserById_success() throws Exception {
         UserEntity updatedUser = new UserEntity(1, "ahahah", "qwe", "rty");
 
         Mockito.when(userRepository.findById(updatedUser.getId())).thenReturn(Optional.of(updatedUser));
@@ -220,7 +215,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void deletePatientById_notFound() throws Exception {
+    public void deleteUserById_notFound() throws Exception {
         UserEntity updatedUser = new UserEntity("he", "min", "der");
 
         Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());

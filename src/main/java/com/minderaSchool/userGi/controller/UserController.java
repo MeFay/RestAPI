@@ -2,8 +2,7 @@ package com.minderaSchool.userGi.controller;
 
 import com.minderaSchool.userGi.dto.UserDtoAllInfo;
 import com.minderaSchool.userGi.dto.UserDtoUsernamePassword;
-import com.minderaSchool.userGi.dto.UserDtoGetUsers;
-import com.minderaSchool.userGi.entity.UserEntity;
+import com.minderaSchool.userGi.dto.UserDto;
 import com.minderaSchool.userGi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ public class UserController {
     }
 
     @GetMapping()
-    public List<UserDtoGetUsers> getUserList() {
+    public List<UserDto> getUserList() {
         return service.getAllUsers();
     }
 

@@ -5,9 +5,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class UserDtoGetUsers {
-
-    private int id;
+@Setter
+public class UserDto {
+    private Integer id;
     private String username;
-
 }

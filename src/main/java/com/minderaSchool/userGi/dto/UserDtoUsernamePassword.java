@@ -5,7 +5,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class UserDtoUsernamePassword {
+@Setter
+public class UserDtoUsernamePassword extends UserDto {
     private String username;
     private String password;
+    private String email;
 }
