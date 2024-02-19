@@ -200,6 +200,43 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void patchUser_success() throws Exception {
+        UserEntity patchedUser1 = new UserEntity(1, "hjg", "dubi", "daba");
+        UserEntity patchedUser2 = new UserEntity(1, "hjg", "dfdfdfdf", "dadddba");
+
+        Mockito.when(userRepository.findById(patchedUser1.getId())).thenReturn(Optional.of(patchedUser1));
+        Mockito.when(userRepository.save(patchedUser1)).thenReturn(patchedUser2);
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+                .patch("/user/{id}",1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.mapper.writeValueAsString(patchedUser2));
+
+        mockMvc.perform(mockRequest)
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is("hjg")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void patchUser_nullIdFailure() throws Exception {
+        UserEntity patchedUser1 = new UserEntity("hh", "agua", "aqua");
+
+        Mockito.when(userRepository.findById(1)).thenReturn(Optional.empty());
+        Mockito.when(userRepository.save(patchedUser1)).thenReturn(patchedUser1);
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+                .patch("/user/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.mapper.writeValueAsString(patchedUser1));
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest());
+    }
+
 
     @Test
     public void deleteUserById_success() throws Exception {

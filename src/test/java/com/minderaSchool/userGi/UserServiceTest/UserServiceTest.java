@@ -3,6 +3,7 @@ package com.minderaSchool.userGi.UserServiceTest;
 import com.minderaSchool.userGi.dto.UserDto;
 import com.minderaSchool.userGi.dto.UserDtoAllInfo;
 import com.minderaSchool.userGi.dto.UserDtoUsernamePassword;
+import com.minderaSchool.userGi.dto.UserDtoWithoutEmail;
 import com.minderaSchool.userGi.entity.UserEntity;
 import com.minderaSchool.userGi.exception.BodyNotCompleteException;
 import com.minderaSchool.userGi.exception.ErrorException;
@@ -13,21 +14,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 
@@ -152,12 +145,12 @@ public class UserServiceTest {
     @Test
     public void updateUser_success() throws Exception {
         UserEntity oldUser = new UserEntity(1, "hjg", "dubi", "daba");
-        UserDtoUsernamePassword updatedUserDto = new UserDtoUsernamePassword("hjg", "dfdfdfdf", "dadddba");
+        UserDtoWithoutEmail updatedUserDto = new UserDtoWithoutEmail("dfdfdfdf", "dadddba");
 
         when(userRepository.findById(oldUser.getId())).thenReturn(Optional.of(oldUser));
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserDtoUsernamePassword updatedUser = userService.update(oldUser.getId(), updatedUserDto);
+        UserDtoWithoutEmail updatedUser = userService.update(oldUser.getId(), updatedUserDto);
 
 
         verify(userRepository, times(1)).findById(oldUser.getId());
@@ -171,14 +164,14 @@ public class UserServiceTest {
 
         Assertions.assertEquals(updatedUserDto.getUsername(), updatedUser.getUsername());
         Assertions.assertEquals(updatedUserDto.getPassword(), updatedUser.getPassword());
-        Assertions.assertEquals(oldUser.getEmail(), updatedUser.getEmail());
-        Assertions.assertEquals(oldUser.getId(), updatedUser.getId());
+        Assertions.assertEquals(oldUser.getEmail(), oldUser.getEmail());
+        Assertions.assertEquals(oldUser.getId(), oldUser.getId());
     }
 
     @Test
     public void updateUser_failure() {
         UserEntity oldUser = new UserEntity(1, "hjg", "dubi", "daba");
-        UserDtoUsernamePassword updatedUserDto = new UserDtoUsernamePassword(null, null, "dadddba");
+        UserDtoWithoutEmail updatedUserDto = new UserDtoWithoutEmail(null, "dadddba");
         when(userRepository.findById(oldUser.getId())).thenReturn(Optional.of(oldUser));
         Assertions.assertThrows(BodyNotCompleteException.class, () -> {
             userService.update(oldUser.getId(), updatedUserDto);
@@ -186,6 +179,47 @@ public class UserServiceTest {
         verify(userRepository, times(1)).findById(oldUser.getId());
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    public void patchUser_success() throws Exception {
+        UserEntity oldUser = new UserEntity(1, "hjg", "dubi", "daba");
+        UserDtoWithoutEmail patchedUserDto = new UserDtoWithoutEmail("dfdfdfdf", "dadddba");
+
+        when(userRepository.findById(oldUser.getId())).thenReturn(Optional.of(oldUser));
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserDtoWithoutEmail patchedUser = userService.patch(oldUser.getId(), patchedUserDto);
+
+        verify(userRepository, times(1)).findById(oldUser.getId());
+
+        verify(userRepository, times(1)).save(argThat(userEntity ->
+                userEntity.getId().equals(oldUser.getId()) &&
+                        userEntity.getUsername().equals(patchedUserDto.getUsername()) &&
+                        userEntity.getPassword().equals(patchedUserDto.getPassword()) &&
+                        userEntity.getEmail().equals(oldUser.getEmail())
+        ));
+
+        Assertions.assertEquals(patchedUserDto.getUsername(), patchedUser.getUsername());
+        Assertions.assertEquals(patchedUserDto.getPassword(), patchedUser.getPassword());
+        Assertions.assertEquals(oldUser.getEmail(), oldUser.getEmail());
+        Assertions.assertEquals(oldUser.getId(), oldUser.getId());
+    }
+
+    @Test
+    public void patchUser_failure() {
+        UserEntity oldUser = new UserEntity(1, "hjg", "dubi", "daba");
+        UserDtoWithoutEmail patchedUserDto = new UserDtoWithoutEmail(null, "dadddba");
+
+        when(userRepository.findById(oldUser.getId())).thenReturn(Optional.of(oldUser));
+
+        Assertions.assertThrows(BodyNotCompleteException.class, () -> {
+            userService.patch(oldUser.getId(), patchedUserDto);
+        });
+
+        verify(userRepository, times(1)).findById(oldUser.getId());
+        verify(userRepository, never()).save(any());
+    }
+
 
     @Test
     public void deleteUser_success() {

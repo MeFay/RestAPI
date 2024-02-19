@@ -3,6 +3,7 @@ package com.minderaSchool.userGi.service;
 import com.minderaSchool.userGi.dto.UserDtoAllInfo;
 import com.minderaSchool.userGi.dto.UserDtoUsernamePassword;
 import com.minderaSchool.userGi.dto.UserDto;
+import com.minderaSchool.userGi.dto.UserDtoWithoutEmail;
 import com.minderaSchool.userGi.entity.UserEntity;
 import com.minderaSchool.userGi.exception.BodyNotCompleteException;
 import com.minderaSchool.userGi.exception.UserNotFoundException;
@@ -27,13 +28,12 @@ public class UserService {
             throw new BodyNotCompleteException();
         }
         UserEntity userEntity = convertUserDtoToUserEntity(userDto);
-
         UserEntity userEntitySaved = userRepository.save(userEntity);
-
         return convertUserEntityToUserDto(userEntitySaved);
+
     }
 
-    private UserEntity convertUserDtoToUserEntity(UserDtoUsernamePassword userDto){
+    private UserEntity convertUserDtoToUserEntity(UserDtoUsernamePassword userDto) {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(userDto.getUsername());
         userEntity.setPassword(userDto.getPassword());
@@ -42,7 +42,7 @@ public class UserService {
         return userEntity;
     }
 
-    private UserDtoUsernamePassword convertUserEntityToUserDto(UserEntity userEntity){
+    private UserDtoUsernamePassword convertUserEntityToUserDto(UserEntity userEntity) {
         UserDtoUsernamePassword userDto = new UserDtoUsernamePassword();
         userDto.setId(userEntity.getId());
         userDto.setUsername(userEntity.getUsername());
@@ -53,7 +53,7 @@ public class UserService {
     }
 
     public UserDtoAllInfo getUser(Integer id) throws BodyNotCompleteException {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         return new UserDtoAllInfo(userEntity.getId(), userEntity.getUsername(), userEntity.getPassword(), userEntity.getEmail());
     }
 
@@ -64,8 +64,8 @@ public class UserService {
                 .toList();
     }
 
-    public UserDtoUsernamePassword update(Integer id, UserDtoUsernamePassword newUser) {
-        UserEntity oldUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
+    public UserDtoWithoutEmail update(Integer id, UserDtoWithoutEmail newUser) {
+        UserEntity oldUser = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         if (newUser.getUsername() == null || newUser.getPassword() == null) {
             throw new BodyNotCompleteException();
         }
@@ -74,24 +74,27 @@ public class UserService {
         return newUser;
     }
 
-    public UserDtoUsernamePassword patch(Integer id, UserDtoUsernamePassword newUser) {
-        UserEntity oldUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
-
-        if (newUser.getUsername() == null && newUser.getPassword() == null) {
+    public UserDtoWithoutEmail patch(Integer id, UserDtoWithoutEmail newUser) {
+        if (newUser == null) {
+            throw new IllegalArgumentException("newUser cannot be null");
+        }
+        UserEntity oldUser = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        if (newUser.getUsername() == null || newUser.getPassword() == null) {
             throw new BodyNotCompleteException();
         }
-        if (newUser.getUsername() != null || newUser.getUsername().isEmpty()) {
+        if (newUser.getUsername() != null && !newUser.getUsername().isEmpty()) {
             oldUser.setUsername(newUser.getUsername());
         }
-        if (newUser.getPassword() != null || newUser.getPassword().isEmpty()) {
+        if (newUser.getPassword() != null && !newUser.getPassword().isEmpty()) {
             oldUser.setPassword(newUser.getPassword());
         }
         userRepository.save(oldUser);
         return newUser;
     }
 
+
     public void deleteUser(Integer id) {
-        userRepository.findById(id).orElseThrow(() -> new BodyNotCompleteException());
+        userRepository.findById(id).orElseThrow(BodyNotCompleteException::new);
         userRepository.deleteById(id);
     }
 }

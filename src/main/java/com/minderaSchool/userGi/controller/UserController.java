@@ -3,9 +3,9 @@ package com.minderaSchool.userGi.controller;
 import com.minderaSchool.userGi.dto.UserDtoAllInfo;
 import com.minderaSchool.userGi.dto.UserDtoUsernamePassword;
 import com.minderaSchool.userGi.dto.UserDto;
+import com.minderaSchool.userGi.dto.UserDtoWithoutEmail;
 import com.minderaSchool.userGi.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {
-    @Autowired
-    private UserService service;
+
+    private final UserService service;
 
     @PostMapping()
     public UserDtoUsernamePassword createUser(@RequestBody UserDtoUsernamePassword user) {
@@ -33,12 +33,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserDtoUsernamePassword update(@PathVariable Integer id, @RequestBody UserDtoUsernamePassword user) {
+    public UserDtoWithoutEmail update(@PathVariable Integer id, @RequestBody UserDtoWithoutEmail user) {
         return service.update(id, user);
     }
 
     @PatchMapping({"/{id}"})
-    public UserDtoUsernamePassword patch(@PathVariable Integer id, @RequestBody UserDtoUsernamePassword user) {
+    public UserDtoWithoutEmail patch(@PathVariable Integer id, @RequestBody UserDtoWithoutEmail user) {
         return service.patch(id, user);
     }
 
